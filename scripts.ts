@@ -877,8 +877,8 @@ async function searchSite(precisionRqd = 1.00, userClick = true) {
 	//0.82 (very fuzzy) < precisionRqd <= 1.00 (perfect matches only)
 
 	// stop user input
-	document.getElementById("pauseUserInputContent").innerHTML = "Please wait. Searching entire site....0/" + (searchFiles.length - 1);
-	document.getElementById("pauseUserInput").style.display = "block";
+	document.getElementById("popUpBackgroundContent").innerHTML = "Please wait. Searching entire site....0/" + (searchFiles.length - 1);
+	document.getElementById("popUpBackground").style.display = "block";
 
 	//initialize variables
 	let foundSomeMatches = false;
@@ -925,7 +925,7 @@ async function searchSite(precisionRqd = 1.00, userClick = true) {
 					siteSearchResults.push({ title: searchFiles[i]['title'], matches: matchSubStrings, phrases: matchPhrases, page: searchFiles[i] });
 				}
 			}
-			document.getElementById("pauseUserInputContent").innerHTML = "Please wait. Searching entire site...." + i + "/" + (searchFiles.length - 1);
+			document.getElementById("popUpBackgroundContent").innerHTML = "Please wait. Searching entire site...." + i + "/" + (searchFiles.length - 1);
 		}
 
 		if (foundSomeMatches) {
@@ -938,8 +938,8 @@ async function searchSite(precisionRqd = 1.00, userClick = true) {
 	} //end of if (docSearchTerm != null && docSearchTerm!="")
 
 	// re-allow user input
-	document.getElementById("pauseUserInputContent").innerHTML = "Calculating....";
-	document.getElementById("pauseUserInput").style.display = "none";
+	document.getElementById("popUpBackgroundContent").innerHTML = "Calculating....";
+	document.getElementById("popUpBackground").style.display = "none";
 }
 
 //==========================================================================================

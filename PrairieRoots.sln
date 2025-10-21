@@ -11,9 +11,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PrairieRoots", "PrairieRoot
 		styles.css = styles.css
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "About", "About", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		About\About.html = About\About.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{389D5640-2ACF-48D0-90CC-E5643E42C319}"
+	ProjectSection(SolutionItems) = preProject
+		References\References.html = References\References.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Welcome", "Welcome", "{6BE2C5F0-2D2E-4A36-A8B6-26AD079B2526}"
+	ProjectSection(SolutionItems) = preProject
+		Welcome\Welcome.html = Welcome\Welcome.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+		{389D5640-2ACF-48D0-90CC-E5643E42C319} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+		{6BE2C5F0-2D2E-4A36-A8B6-26AD079B2526} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3A95C5A-5D36-4F1F-9077-D653B79DDA17}
