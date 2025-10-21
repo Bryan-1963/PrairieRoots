@@ -1,4 +1,41 @@
+//======================================================================================================================================================================================
+// CLASSES
+//======================================================================================================================================================================================
+//---------------------------
+// PageObject
+//---------------------------	
+class PageObject {
+	number;
+	title;
+	path;
+	category;
+};
 
+//---------------------------
+// AnnotatedPhotoObject
+//---------------------------	
+class AnnotatedPhotoObject {
+	photoFilePath;
+	caption;
+	annotation;
+};
+
+//---------------------------
+// PageStack
+//---------------------------
+class PageStack {
+	pageParam;
+	siteSrchTrmInpt;
+	siteSearchRslts;
+	sitePrecision;
+	docPagePath;
+	docTitle;
+	docPagesRSrchd;
+	docSrchTrm;
+	docPrecision;
+	docSrchRsltPgs; //array of page numbers containing the searched for text
+	docCurrPg;
+};	
 
 //==========================================================================================
 // GLOBAL VARIABLES
@@ -19,12 +56,12 @@ var maps = []; //array of PageObjects for maps
 var countySchoolDistricts = []; //array of PageObjects for elementary schools
 var countyHighSchools = []; //array of PageObjects for high schools
 var usdSchools = []; //array of PageObjects for USDs
-var pottawatomieMissionSchool = {};
+var pottawatomieMissionSchool: PageObject = new PageObject();
 var colleges = [];
 var overviews = [];
 
 //siteSearch variables
-var siteSearchInputBox = document.getElementById("siteSearchInputBox");
+var siteSearchInputBox = document.getElementById("siteSearchInputBox") as HTMLInputElement;
 var siteSearchPrecision = 1.00;
 var searchFiles = []; //array of PageObjects for searching the site
 var siteSearchResults = []; //matches
@@ -42,18 +79,20 @@ var docDisplayMode = 'display'; //'display'=show from file, 'edit'=edit enabled
 var docPgNum = 0;
 var documentTitle = "";
 var docPgPath = "";
-var docPageNumInput = document.getElementById("docPageNumInput");
-var docPageSearchInput = document.getElementById("docPageSearchInput");
+var docPageNumInput = document.getElementById("docPageNumInput") as HTMLInputElement;
+var docPageSearchInput = document.getElementById("docPageSearchInput") as HTMLInputElement;
+
+var myIframe = document.getElementById('ContentHolder') as HTMLIFrameElement;
 
 //=======================================================================================================================================================
 // EVENT LISTENERS
 //=======================================================================================================================================================	
-window.addEventListener("resize", sizeBars());
-document.getElementById("MainMenu").addEventListener("load", sizeBars());
-document.getElementById("SubMenu").addEventListener("load", sizeBars());
-document.getElementById("iFrameHolder").addEventListener("load", sizeBars());
-document.getElementById("SubTitle").addEventListener("load", sizeBars());
-document.getElementById("ContentTitle").addEventListener("load", sizeBars());
+window.addEventListener("resize", this.sizeBars);
+document.getElementById("MainMenu").addEventListener("load", this.sizeBars);
+document.getElementById("SubMenu").addEventListener("load", this.sizeBars);
+document.getElementById("iFrameHolder").addEventListener("load", this.sizeBars);
+document.getElementById("SubTitle").addEventListener("load", this.sizeBars);
+document.getElementById("ContentTitle").addEventListener("load", this.sizeBars);
 
 //---------------------------
 // ELEMENT RESIZE OBSERVER
@@ -62,7 +101,7 @@ var ro = new ResizeObserver(entries => {
 	for (let entry of entries) {
 		if (entry.contentBoxSize) {
 			//entry.target.handleResize(entry);
-			sizeBars();
+			this.sizeBars;
 		}
 	}
 });
@@ -77,12 +116,13 @@ ro.observe(document.getElementById("ContentTitle"));
 docPageNumInput.addEventListener("keydown", function (e) {
 	if (e.code === "Enter" || e.code === "NumpadEnter") //checks whether the pressed key is "Enter"
 	{
-		docPgNum = Math.floor(Number(e.target.value)) - 1; //eliminate any decimal and change user 1-based input to 0-based input
+		
+		docPgNum = Math.floor(Number(docPageNumInput.value)) - 1; //eliminate any decimal and change user 1-based input to 0-based input
 		if (docPgNum > docPages.length - 1) { docPgNum = docPages.length - 1 }
 		if (docPgNum < 0) { docPgNum = 0 };
 
 		//update the page number input box to account for limiting
-		docPageNumInput.setAttribute("value", Number(docPgNum) + 1);
+		docPageNumInput.setAttribute("value", (Number(docPgNum) + 1).toString());
 
 		console.log("docPgNum=" + docPgNum);
 
@@ -125,7 +165,7 @@ siteSearchInputBox.addEventListener("keydown", function (e) {
 //-----------------------------------------
 // subPage load listener
 //-----------------------------------------
-var myIframe = document.getElementById('ContentHolder');
+
 myIframe.addEventListener("load", function () {
 
 	//in case iFrame loaded before startup was complete, initialize webStack
@@ -156,8 +196,8 @@ function startup() {
 	countySchoolDistricts.length = 0;
 	countyHighSchools.length = 0;
 	usdSchools.length = 0;
-	initVars(); //load global variables
-	sizeBars(); //size and place the menu bars
+	this.initVars; //load global variables
+	this.sizeBars; //size and place the menu bars
 
 	//in case startup completed before iFrame loaded, initialize webStack
 	if (webStack.length === 0) {
@@ -174,166 +214,12 @@ function startup() {
 
 };
 
-//==========================================================================================
-// toggleDocDisplayMode
-//==========================================================================================
-//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-/*
-function toggleDocDisplayMode(){
-	if (docDisplayMode==='display'){
-		toggleRslt = setDocDisplayMode('edit');
-	}
-	else {
-		setDocDisplayMode('display');
-	}
-}
-*/
-
-//==========================================================================================
-// setDocDisplayMode
-//==========================================================================================
-//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-/*	
-function setDocDisplayMode(mode){
-	// returns 'success' or 'cancel'
-	
-	let result = "";
-	
-	if (mode==='display') {
-
-		//if went from edit to display, see if there are any edits made
-		if (currDocPageEdited()){
-			//see if user wants to cancel and save the changes
-			if (confirm("Edits have been made. They will be lost if you proceed without saving first. Proceed?")){
-				docDisplayMode='display'
-				document.getElementById('docAnnotation').style.display = 'block';
-				document.getElementById('docAnnotationEdited').style.display = 'none';
-				document.getElementById('figCaption').style.display = 'block';
-				document.getElementById('figCaptionEditor').style.display = 'none';		
-			result='success';
-			}
-			else {
-				result='cancel';
-			}
-		}
-		else {
-			docDisplayMode='display'
-			document.getElementById('docAnnotation').style.display = 'block';
-			document.getElementById('docAnnotationEdited').style.display = 'none';
-			document.getElementById('figCaption').style.display = 'block';
-			document.getElementById('figCaptionEditor').style.display = 'none';		
-			result='success';
-		}
-	
-	}
-	else if (mode==='edit'){
-		docDisplayMode='edit'
-		document.getElementById('docAnnotation').style.display = 'none';
-		document.getElementById('docAnnotationEdited').style.display = 'block';
-		document.getElementById('figCaption').style.display = 'none';
-		document.getElementById('figCaptionEditor').style.display = 'block';
-		result='success';
-	}
-	return result;
-}
-*/
-
-//==========================================================================================
-// currDocPageEdited
-//==========================================================================================
-//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-/*
-function currDocPageEdited(){
-	
-	// docPages[docPgNum]!=current values then it is edited
-	let result=false;
-	
-	// get the caption and compare
-	let newCaption=document.getElementById('figCaptionEdited').value;
-	if (newCaption != docPages[docPgNum]['caption']){
-		console.log("return true, caption has been edited");
-		result=true;
-		return true;
-	}
-	
-	//get paragraphs from annotation and compare
-	let newAnnotation = getEditedDocAnnotationParas();
-	
-	console.log("newParas=" + JSON.stringify(newParas));
-	
-	let storedParas=docPages[pgNum]['description'];
-	
-	console.log("storedParas=" + JSON.stringify(storedParas));
-	
-	for (let paraNum=0; paraNum<=storedParas.length-1; paraNum++){
-		
-		if (storedParas[paraNum].toString().trim() != newParas[paraNum].toString().trim()){
-			result=true;
-			console.log("return true, annotation has been edited");
-			return true;
-			break;
-		}
-	} //end of of (let paraNum) loop
-	console.log("return false, no edits made");
-	return false;
-}
-*/
-
-//==========================================================================================
-// getEditedDocAnnotationParas
-//==========================================================================================
-//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-/*
-function getEditedDocAnnotationParas(){
-	let newAnnotation = document.getElementById('docAnnotationEdited').value;
-	let newPieces = newAnnotation.split("\n\r");
-	let newParas = [];
-	for (let i=0;i<=newPieces.length-1;i++){
-		if (newPieces[i] != ''){
-			newParas.push(newPieces[i]);
-		}
-	}
-	return newParas;
-}
-*/
-
-//==========================================================================================
-// saveDocDisplayEdits
-//==========================================================================================
-//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-/*
-async function saveDocDisplayEdits(){
-	if (!currDocPageEdited()){
-		alert("No changes have been made.");
-	}
-	else {
-		if (confirm("Save your edits?")){
-			
-			//build newDocPage
-			let newCaption=document.getElementById('figCaptionEdited').value;
-			let newAnnotation = getEditedDocAnnotationParas();
-			let isObject = {photoFilePath: docPages[pgNum]['photoFilePath'], caption: newCaption, description: newAnnotation};
-
-			//store record of changes made in file "OnlineEditHistory.json"
-			let chgRecord = {type:'document edit', timeStamp: Date.now(), wasObject:docPages[pgNum], isObject: newDocPage}
-			
-			//update docPages
-			docPages[pgNum] = JSON.parse(JSON.stringify(isObject));
-			
-			//store updated docPages
-			TO-DO!!!
-			
-		}
-	}
-}
-*/
 
 //==========================================================================================
 // navStack
 //==========================================================================================	
-async function navStack(dir) {
+async function navStack(dir): Promise<void> {
 	var subTitle = document.getElementById("SubTitle");
-	var contentHolder = document.getElementById("ContentHolder");
 
 	// START DEBUG ONLY
 	/*
@@ -382,7 +268,7 @@ async function navStack(dir) {
 	if (docSearchTerm === undefined || docSearchTerm === 'undefined') {
 		docSearchTerm = "";
 	}
-	document.getElementById("docPageSearchInput").value = docSearchTerm;
+	docPageSearchInput.value = docSearchTerm;
 	docSearchPrecision = webStack[webStackIndex].docPrecision * 1;
 	docPgNum = webStack[webStackIndex].docCurrPg * 1;
 	docPageSearchInput.value = docSearchTerm;
@@ -572,7 +458,7 @@ function addToWebStack(pgIn) {
 function clearSearchInput(inputBoxName) {
 
 	//get the input box
-	let thisSearchBox = document.getElementById(inputBoxName);
+	let thisSearchBox = document.getElementById(inputBoxName) as HTMLInputElement;
 
 	//clear the input box
 	thisSearchBox.setAttribute("value", "");
@@ -631,7 +517,6 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
 
 	var subTitle = document.getElementById("SubTitle");
 	var subMenu = document.getElementById("SubMenu");
-	var contentHolder = document.getElementById("ContentHolder");
 	var contentTitleBar = document.getElementById("ContentTitle");
 	let iFrameHldr = document.getElementById("iFrameHolder");
 	let documentContentHolder = document.getElementById("documentContentHolder");
@@ -639,7 +524,7 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
 	let docFigCapt = document.getElementById("figCaption");
 	let docNavBar = document.getElementById("docNavBar");
 	let schoolNavBar = document.getElementById("schoolNavBar");
-	let docPgImg = document.getElementById("docPageImg");
+	let docPgImg = document.getElementById("docPageImg") as HTMLImageElement;
 	let searchRsltsHolder = document.getElementById("searchResultsHolder");
 	let subSelectorHolder = document.getElementById("subSelector");
 	//console.log("config="+config);
@@ -858,7 +743,7 @@ function showSiteSearchResults(userClick = true) {
 	if (userClick) {
 		//console.log("-------------------------------------------------------------------------------");
 		//console.log("adding to stack in showSiteSearchResults");
-		thisPage = new PageObject();
+		let thisPage = new PageObject();
 		thisPage.number = "";
 		thisPage.title = "Site Search";
 		thisPage.path = "";
@@ -867,13 +752,13 @@ function showSiteSearchResults(userClick = true) {
 	}
 
 	// ADJUST LOCATIONS OF BARS
-	sizeBars()
+	this.sizeBars;
 }
 
 //==========================================================================================
 // searchSite
 //==========================================================================================
-async function searchSite(precisionRqd = 1.00, userClick = true) {
+async function searchSite(precisionRqd = 1.00, userClick = true): Promise<void> {
 	//0.82 (very fuzzy) < precisionRqd <= 1.00 (perfect matches only)
 
 	// stop user input
@@ -885,7 +770,7 @@ async function searchSite(precisionRqd = 1.00, userClick = true) {
 	siteSearchResults.length = 0;
 	siteSearchPrecision = precisionRqd; //save to global variable
 	//siteSearchInputBox = document.getElementById("siteSearchInputBox");
-	siteSearchTerm = siteSearchInputBox.value;
+	let siteSearchTerm = siteSearchInputBox.value;
 
 	if (siteSearchTerm === null
 		|| siteSearchTerm === undefined
@@ -981,17 +866,17 @@ function getMatchPhrases(inArr, strIn) {
 				if (startChar + len <= strIn.length - 1) {
 					let endsFound = 0;
 					for (let i = startChar + len - 1; i <= strIn.length - 1; i++) {
-
-						if (charIsPhraseEnder(strIn[i, i + 1])) {
+						let thisChar = strIn.charAt(i);
+						if (charIsPhraseEnder(thisChar)) {
 							endsFound = endsFound + 1;
 						}
-						if (strIn[i, i + 1] === "<" || strIn[i, i + 1] === ">") {
+						if (thisChar === "<" || thisChar === ">") {
 							endsFound = 2;
 						}
 
 						//keep the first phrase ender but not the second  (unless its an HTML tag, then only keep the first)
 						if (endsFound < 2) {
-							rtPart = rtPart + strIn[i, i + 1];
+							rtPart = rtPart + thisChar;
 						}
 						else {
 							break;
@@ -1002,19 +887,19 @@ function getMatchPhrases(inArr, strIn) {
 				//search backwards to start of previous word or punctuation, whichever comes first
 				let lftPart = "";
 				if (startChar >= 1) {
-					endsFound = 0;
+					let endsFound = 0;
 					for (let i = startChar - 2; i >= 0; i--) {
-
-						if (charIsPhraseEnder(strIn[i, i + 1])) {
+						let thisChar = strIn.charAt(i);
+						if (charIsPhraseEnder(thisChar)) {
 							endsFound = endsFound + 1;
 						}
-						if (strIn[i, i + 1] === "<" || strIn[i, i + 1] === ">") {
+						if (thisChar === "<" || thisChar === ">") {
 							endsFound = 2;
 						}
 
 						//keep the first phrase ender but not the second (unless its an HTML tag, then only keep the first)
 						if (endsFound < 2) {
-							lftPart = strIn[i, i + 1] + lftPart;
+							lftPart = thisChar + lftPart;
 							//console.log("     endsFound="+endsFound+", lftPart=|" + lftPart + "|");
 						}
 						else if (endsFound >= 2) {
@@ -1235,7 +1120,7 @@ function searchDocument(precisionRqd = 1.00, userClick = true) {
 
 			//check the caption
 			if (!thisPageHasIt) {
-				thisTxt = docPages[pgNum]['caption'].toString();
+				let thisTxt = docPages[pgNum]['caption'].toString();
 				thisPageHasIt = TextHasSearchTerm(thisTxt, precisionRqd);
 			}
 
@@ -1312,7 +1197,7 @@ function navDocSearchResults(movement) {
 //==========================================================================================
 // loadDocPages
 //==========================================================================================
-async function loadDocPages(filePath, docTitle, userClick = true) {
+async function loadDocPages(filePath, docTitle = "", userClick = true): Promise <void> {
 	//console.log("in loadDocPages, recd filePath="+filePath+", docTitle="+docTitle+", userClick="+userClick);
 	//console.log("rcd filePath="+filePath+", docTitle="+docTitle+", userClick="+userClick);
 
@@ -1328,15 +1213,16 @@ async function loadDocPages(filePath, docTitle, userClick = true) {
 	//clean out old info
 	document.getElementById("docAnnotation").innerHTML = "";
 	document.getElementById("figCaption").innerHTML = "";
-	document.getElementById("docPageImg").src = "";
+	let docPgImageEl = document.getElementById("docPageImg") as HTMLImageElement;
+	docPgImageEl.src = "";
 
 	//fetch the data about the document
 	docPages.length = 0;
 	let myObject = await fetch(webRootLocation + filePath);
 	let myText = await myObject.text();
 	docPages = JSON.parse(myText);
-	let totDocPgs = document.getElementById("totalDocPages");
-	totalDocPages.innerHTML = " of " + docPages.length;
+	let totDocPgs = document.getElementById("totalDocPages") as HTMLSpanElement;
+	totDocPgs.innerHTML = " of " + docPages.length;
 
 	//reset current page number within document
 	docPgNum = 0;
@@ -1349,7 +1235,7 @@ async function loadDocPages(filePath, docTitle, userClick = true) {
 	//console.log("siteSearchTermInput="+siteSearchTermInput+", docSearchTerm="+docSearchTerm);
 	if (siteSearchTermInput != "" && docSearchTerm === "") {
 		//console.log("searching document");
-		document.getElementById("docPageSearchInput").value = siteSearchTermInput;
+		docPageSearchInput.value = siteSearchTermInput;
 		searchDocument(siteSearchPrecision, false);
 	}
 
@@ -1357,7 +1243,7 @@ async function loadDocPages(filePath, docTitle, userClick = true) {
 	if (userClick) {
 		//console.log("-------------------------------------------------------------------------------");
 		//console.log("calling addToWebStack from loadDocPages");
-		thisPage = new PageObject();
+		let thisPage = new PageObject();
 		thisPage.number = "";
 		thisPage.title = docTitle;
 		thisPage.path = filePath;
@@ -1373,7 +1259,7 @@ function loadDocPageNum(pgNum, userClick = true) {
 	docPgNum = pgNum * 1;  //global variable load
 
 	// update image source path
-	let docImg = document.getElementById('docPageImg');
+	let docImg = document.getElementById('docPageImg') as HTMLImageElement;
 	docImg.src = webRootLocation + docPages[pgNum]['photoFilePath'].toString();
 
 	//update image caption
@@ -1385,46 +1271,24 @@ function loadDocPageNum(pgNum, userClick = true) {
 		figCapt.innerHTML = "";
 	}
 
-	//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-	/*
-	document.getElementById('figCaptionEdited').value = figCapt.innerHTML
-	*/
-
 	//update the annotation HTML
 	let thisAnnotation = docPages[pgNum]['description'];  //NOTE: thisAnnotation is an array of paragraph texts
 	let totalAnnotation = "";
-
-	//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-	/*
-	let totalEditAnnotation = "";
-	*/
 
 	for (let paraNum = 0; paraNum <= thisAnnotation.length - 1; paraNum++) {
 		thisAnnotation[paraNum] = thisAnnotation[paraNum].toString().replace(/[\r\n]/g, "<br>");
 		totalAnnotation = totalAnnotation + thisAnnotation[paraNum] + "<br><br>";
 
-		//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-		/*
-		totalEditAnnotation=totalEditAnnotation+thisAnnotation[paraNum] + '\r\n\r\n';
-		*/
-
 	}
 	let docAnnot = document.getElementById("docAnnotation");
 	docAnnot.innerHTML = totalAnnotation;
 
-	//NOTE: CANNOT EDIT AND SAVE ON gitHub, FUTURE PROJECT ON DIFFERENT SERVICE WITH SERVER-SIDE Database
-	/*
-	let docAnnotEdited = document.getElementById("docAnnotationEdited");
-	docAnnotEdited.value = totalEditAnnotation;
-	*/
-
 	//update the page number input box
-	let pgNumInput = document.getElementById("docPageNumInput");
-	pgNumInput.setAttribute("value", Number(pgNum) + 1); //NOTE: pgNum is zero based, people like 1 based
-	pgNumInput.dispatchEvent(new Event('input'));
-	pgNumInput.value = Number(pgNum) + 1;
-	pgNumInput.focus();
-	pgNumInput.dispatchEvent(new Event('input'));
+	docPageNumInput.setAttribute("value", (Number(pgNum) + 1).toString()); //NOTE: pgNum is zero based, people like 1 based
+	docPageNumInput.dispatchEvent(new Event('input'));
+	docPageNumInput.value = (Number(pgNum) + 1).toString();
+	docPageNumInput.focus();
+	docPageNumInput.dispatchEvent(new Event('input'));
 
 	// if docPagesAreSearched then search and highlight all the instances
 	if (docPagesAreSearched) {
@@ -1557,12 +1421,11 @@ function navDocPage(movement) {
 	*/
 
 	//update the page number input box to account for limiting
-	let pgNumInput = document.getElementById("docPageNumInput");
-	pgNumInput.setAttribute("value", Number(docPgNum) + 1); //NOTE: pgNum is zero based, people like 1 based
-	pgNumInput.dispatchEvent(new Event('input'));
-	pgNumInput.value = Number(docPgNum) + 1;
-	pgNumInput.focus();
-	pgNumInput.dispatchEvent(new Event('input'));
+	docPageNumInput.setAttribute("value", (Number(docPgNum) + 1).toString()); //NOTE: pgNum is zero based, people like 1 based
+	docPageNumInput.dispatchEvent(new Event('input'));
+	docPageNumInput.value = (Number(docPgNum) + 1).toString();
+	docPageNumInput.focus();
+	docPageNumInput.dispatchEvent(new Event('input'));
 
 	//load the requested page	
 	loadDocPageNum(docPgNum);
@@ -1738,11 +1601,10 @@ function sizeBars() {
 function showMap(params, userClick = true) {
 	var contentTitleBar = document.getElementById("ContentTitle");
 	var subTitle = document.getElementById("SubTitle");
-	var contentHolder = document.getElementById("ContentHolder");
 	configurePage('subPage', true, false);
 	subTitle.innerHTML = "Maps";
 	contentTitleBar.innerHTML = params['title'];
-	contentHolder.src = params['path'];
+	myIframe.src = params['path'];
 
 	//add to the web page stack if user navigated here
 	if (userClick) {
@@ -1759,7 +1621,6 @@ function showSchool(params, subMenuSelection = "", userClick = true) {
 
 	let contentTitleBar = document.getElementById("ContentTitle");
 	let subTitle = document.getElementById("SubTitle");
-	let contentHolder = document.getElementById("ContentHolder");
 	let filePath = "";
 
 	//subMenuSelection is only specified when user changes subMenu for a school (e.g. Overview, Location, People, Event)
@@ -1790,8 +1651,8 @@ function showSchool(params, subMenuSelection = "", userClick = true) {
 	contentTitleBar.innerHTML = subMenuSelection;
 
 	//build and fill the school-specific navbar
-	schoolNavBar = document.getElementById("schoolNavBar");
-	strParam = JSON.stringify(params);
+	let schoolNavBar = document.getElementById("schoolNavBar");
+	let strParam = JSON.stringify(params);
 	strParam = strParam.replace(/"/g, "'");
 	let navHTML = "<a onclick=\"showSchool(" + strParam + ",'Overview')\">Overview</a>";
 	navHTML = navHTML + "<a onclick=\"showSchool(" + strParam + ",'Locations')\">Location(s) and Bldg(s)</a>";
@@ -1809,7 +1670,7 @@ function showSchool(params, subMenuSelection = "", userClick = true) {
 	}
 
 	//load the requested page
-	contentHolder.src = filePath;
+	myIframe.src = filePath;
 }
 
 //==========================================================================================
@@ -1818,7 +1679,6 @@ function showSchool(params, subMenuSelection = "", userClick = true) {
 function showOverview(params, userClick = true) {
 	let contentTitleBar = document.getElementById("ContentTitle");
 	let subTitle = document.getElementById("SubTitle");
-	let contentHolder = document.getElementById("ContentHolder");
 
 	//show the correct configuration and update titles
 	configurePage('subPage', true, false);
@@ -1826,7 +1686,7 @@ function showOverview(params, userClick = true) {
 	contentTitleBar.innerHTML = params['title'];
 
 	//load the requested page
-	contentHolder.src = params['path'];
+	myIframe.src = params['path'];
 
 	//add to the web page stack if user navigated here
 	if (userClick) {
@@ -1854,8 +1714,8 @@ function highlightSearchResultsInSubPage() {
 				for (let j = 0; j <= siteSearchResults[i]['matches'].length - 1; j++) {
 
 					let re = RegExp(siteSearchResults[i]['matches'][j]['text'], "ig");
-					var iframe = document.getElementById('ContentHolder');
-					let iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+					
+					let iframeDoc = myIframe.contentDocument || myIframe.contentWindow.document;
 					var iframeBody = iframeDoc.getElementsByTagName('body')[0];
 					//console.log(iframeBody.innerHTML);
 					let txt = iframeBody.innerHTML;
@@ -1882,7 +1742,6 @@ function menuClick(params, userClick = true) {
 	var contentSource = '';
 	var subTitle = document.getElementById("SubTitle");
 	var subMenu = document.getElementById("SubMenu");
-	var contentHolder = document.getElementById("ContentHolder");
 	var contentTitleBar = document.getElementById("ContentTitle");
 	let iFrameHldr = document.getElementById("iFrameHolder");
 	let documentContentHolder = document.getElementById("documentContentHolder");
@@ -1918,7 +1777,7 @@ function menuClick(params, userClick = true) {
 			//---------------------------		  
 			configurePage('subPage', false, false);
 			subTitle.innerHTML = "Welcome";
-			contentHolder.src = "Welcome/Welcome.html";
+			myIframe.src = "Welcome/Welcome.html";
 
 			//add to the web page stack if user navigated here
 			if (userClick) {
@@ -1947,7 +1806,7 @@ function menuClick(params, userClick = true) {
 				subSelectorContents = subSelectorContents + "onclick=\"showOverview(" + param + ", true);\">";
 				subSelectorContents = subSelectorContents + overviews[i].title + "</a><br><br>";
 			}
-			subSelectorContentHolder.style.columnCount = 1;
+			subSelectorContentHolder.style.columnCount = '1';
 			subSelectorContentHolder.innerHTML = subSelectorContents;
 
 			//add to the web page stack if user navigated here
@@ -1979,7 +1838,7 @@ function menuClick(params, userClick = true) {
 				subSelectorContents = subSelectorContents + "onclick=\"showMap(" + param + ", true)\">";
 				subSelectorContents = subSelectorContents + maps[i].title + "</a><br><br>";
 			}
-			subSelectorContentHolder.style.columnCount = 3;
+			subSelectorContentHolder.style.columnCount = '3';
 			subSelectorContentHolder.innerHTML = subSelectorContents;
 
 			//add to the web page stack if user navigated here
@@ -2000,7 +1859,7 @@ function menuClick(params, userClick = true) {
 			//---------------------------
 			configurePage('subSelector', false, false);
 			subTitle.innerHTML = "Schools";
-			subSelectorContentHolder.style.columnCount = 4;
+			subSelectorContentHolder.style.columnCount = '4';
 			subSelectorContentHolder.innerHTML = buildSchoolLinks(); //call subroutine to load the links
 
 			//add to the web page stack if user navigated here
@@ -2020,7 +1879,7 @@ function menuClick(params, userClick = true) {
 			//---------------------------	
 			configurePage('subPage', false, false);
 			subTitle.innerHTML = "References";
-			contentHolder.src = "References/References.html";
+			myIframe.src = "References/References.html";
 
 			//add to the web page stack if user navigated here
 			if (userClick) {
@@ -2039,7 +1898,7 @@ function menuClick(params, userClick = true) {
 			//---------------------------	
 			configurePage('subPage', false, false);
 			subTitle.innerHTML = "Source Materials";
-			contentHolder.src = "SourceMatls/SourceMatls.html";
+			myIframe.src = "SourceMatls/SourceMatls.html";
 
 			//add to the web page stack if user navigated here
 			if (userClick) {
@@ -2060,7 +1919,7 @@ function menuClick(params, userClick = true) {
 			//---------------------------	
 			configurePage('subPage', false, false);
 			subTitle.innerHTML = "About";
-			contentHolder.src = "About/About.html";
+			myIframe.src = "About/About.html";
 
 			//add to the web page stack if user navigated here
 			if (userClick) {
@@ -2079,7 +1938,7 @@ function menuClick(params, userClick = true) {
 	window.top.scrollTo(0, 0);
 
 	// ADJUST LOCATIONS OF BARS
-	sizeBars()
+	this.sizeBars;
 
 };
 
@@ -2121,7 +1980,7 @@ function FindMatchSubStrings(textIn, sortByChoice) {
 
 			for (const match of allRslts) {
 				//console.log(match);
-				rsltObj = { text: match[0], score: 1, position: match.index };
+				let rsltObj = { text: match[0], score: 1, position: match.index };
 				foundMatches.push(rsltObj);
 			}
 
@@ -2135,10 +1994,10 @@ function FindMatchSubStrings(textIn, sortByChoice) {
 
 				for (let startPos = 0; startPos <= textIn.length - 1 - len; startPos++) {
 					let subStr = textIn.substring(startPos, startPos + len - 1);
-					let wt = JaroWinklerDistance(thisTerm, subStr);
+					let wt = this.JaroWinklerDistance(thisTerm, subStr);
 
 					if (wt >= docSearchPrecision) {
-						rsltObj = { text: subStr.trim(), score: wt, position: startPos };
+						let rsltObj = { text: subStr.trim(), score: wt, position: startPos };
 						foundMatches.push(rsltObj);
 						//console.log("rsltObj="+JSON.stringify(rsltObj));
 					}
@@ -2226,7 +2085,7 @@ function TextHasSearchTerm(textIn, precisionRqd) {
 			for (let len = thisEndLen; len >= thisStartLen; len--) {
 				for (let startPos = 0; startPos <= textIn.length - 1 - len; startPos++) {
 
-					let wt = JaroWinklerDistance(thisTerm, textIn.substring(startPos, startPos + len - 1));
+					let wt = this.JaroWinklerDistance(thisTerm, textIn.substring(startPos, startPos + len - 1));
 
 					if (wt >= docSearchPrecision) {
 						thisPageHasIt = true;
@@ -2254,7 +2113,7 @@ function TextHasSearchTerm(textIn, precisionRqd) {
 //==========================================================================================
 // JaroWinklerDistance
 //==========================================================================================
-JaroWinklerDistance = function (s1, s2) {
+const JaroWinklerDistance = function (s1, s2) {
 	//==========================================================================================
 	// for fuzzy searches, returns 'weight' where 0 = no match, 1=perfect match
 	//		s1='martha', s2='marhta' --> weight = 0.96
@@ -2283,11 +2142,11 @@ JaroWinklerDistance = function (s1, s2) {
 		s1Matches = new Array(s1.length),
 		s2Matches = new Array(s2.length);
 
-	for (i = 0; i < s1.length; i++) {
+	for (let i = 0; i < s1.length; i++) {
 		var low = (i >= range) ? i - range : 0,
 			high = (i + range <= s2.length) ? (i + range) : (s2.length - 1);
 
-		for (j = low; j <= high; j++) {
+		for (let j = low; j <= high; j++) {
 			if (s1Matches[i] !== true && s2Matches[j] !== true && s1[i] === s2[j]) {
 				++m;
 				s1Matches[i] = s2Matches[j] = true;
@@ -2302,10 +2161,12 @@ JaroWinklerDistance = function (s1, s2) {
 	}
 
 	// Count the transpositions.
-	var k = n_trans = 0;
+	let n_trans = 0;
+	let k = 0;
 
-	for (i = 0; i < s1.length; i++) {
+	for (let i = 0; i < s1.length; i++) {
 		if (s1Matches[i] === true) {
+			let j = 0;
 			for (j = k; j < s2.length; j++) {
 				if (s2Matches[j] === true) {
 					k = j + 1;
@@ -2334,41 +2195,4 @@ JaroWinklerDistance = function (s1, s2) {
 	return weight;
 };
 
-//======================================================================================================================================================================================
-// CLASSES
-//======================================================================================================================================================================================
-//---------------------------
-// PageObject
-//---------------------------	
-class PageObject {
-	number;
-	title;
-	path;
-	category;
-};
 
-//---------------------------
-// AnnotatedPhotoObject
-//---------------------------	
-class AnnotatedPhotoObject {
-	photoFilePath;
-	caption;
-	annotation;
-};
-
-//---------------------------
-// PageStack
-//---------------------------
-class PageStack {
-	pageParam;
-	siteSrchTrmInpt;
-	siteSearchRslts;
-	sitePrecision;
-	docPagePath;
-	docTitle;
-	docPagesRSrchd;
-	docSrchTrm;
-	docPrecision;
-	docSrchRsltPgs; //array of page numbers containing the searched for text
-	docCurrPg;
-};	

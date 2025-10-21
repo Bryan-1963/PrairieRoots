@@ -1,0 +1,6 @@
+
+-----------------------
+COMPILE TYPESCRIPT
+-----------------------
+1) Package Manager Console
+2) tsc

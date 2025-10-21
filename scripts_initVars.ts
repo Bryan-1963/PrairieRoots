@@ -1292,7 +1292,7 @@ function initVars() {
 	thisFile.path = "PottawatomieMission/PottawatomieMission_Overview.html";
 	thisFile.category = "PottawatomieMission"
 	searchFiles.push(thisFile)
-	pottawatomieMissionSchool = JSON.parse(JSON.stringify(thisFile));
+	pottawatomieMissionSchool = JSON.parse(JSON.stringify(thisFile)) as PageObject ;
 
 	var thisFile = new PageObject();
 	thisFile.number = "";
