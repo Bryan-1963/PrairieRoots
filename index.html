@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Jackson County, Kansas: Schools History</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="keywords" content="Jackson County, Kansas, School, History">
+</head>
+<body>
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- PAUSE USER INPUT DIV -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="pauseUserInput" class="pauseUserInput">
+        <div id="pauseUserInputContent" class="pauseUserInputContent">
+            Calculating.....
+        </div>
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- TITLE BAR -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="TitleBar" class="titleBar" style="display:block;max-width:98%" tabindex=-1>
+        <div class="titleBarTitle">
+            Jackson County, Kansas Schools History
+        </div>
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- MAIN MENU -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="MainMenu" class="navbar">
+
+        <!-- Stack Nav -->
+        <!-- -------------------- -->
+        <div class='stackNavHolder'>
+            <button style='font-size:14px;' onclick="navStack('prev')"><i class='fa fa-angle-left'></i></button>
+            <button style='font-size:14px' onclick="navStack('next')"><i class='fa fa-angle-right'></i></button>
+        </div>
+
+        <div class='menuHolder'>
+            <!-- Home -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'Home',subCat:''})">Home</a>
+
+            <!-- Overview -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'Overview',subCat:''})">Overview</a>
+
+            <!-- Schools -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'Schools',subCat:''})">Schools</a>
+
+            <!-- Maps -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'Maps',subCat:''})">Maps</a>
+
+            <!-- References -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'References',subCat:''})">References</a>
+
+            <!-- Source Materials -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'SourceMatl',subCat:''})">Source Materials</a>
+
+            <!-- About -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'About',subCat:''})">About</a>
+
+            <!-- TEST ONLY -->
+            <!-- -------------------- -->
+            <a onclick="menuClick({category:'Test',subCat:''})" style="display: none;">TEST ONLY</a>
+        </div>
+
+        <!-- Search site -->
+        <div class='searchHolder'>
+
+            <div class='input-wrapper'>
+                <input type='text' id='siteSearchInputBox' name='siteSearchInputBox' class='searchInput' placeholder='Search this site'>
+                <button onclick="clearSearchInput('siteSearchInputBox')" style='font-size:10px'>
+                    <i class='fa fa-close' id='clearInputBtn'></i>
+                </button>
+            </div>
+
+            <!-- search button -->
+            <div class="searchBtnHldr">
+                <button class="searchBtn">
+                    Search
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="searchBtn-content">
+                    <a onclick="searchSite(1.00)">1.00 Exact</a>
+                    <a onclick="searchSite(0.94)">0.94 Fuzzy</a>
+                    <a onclick="searchSite(0.88)">0.88 Fuzzy</a>
+                    <a onclick="searchSite(0.82)">0.82 Fuzzy</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div> <!-- END OF NAVIGATION BAR -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SUBTITLE -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="SubTitle" class="titleBar2">
+        <!-- changed programmatically -->
+        Welcome
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SUBMENU -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="SubMenu" class="navBar2">
+        <!-- displays switched programmatically -->
+        <!-- school subMenu -->
+        <span id='schoolNavBar' style='display: none;'>
+            <!-- filled in programmatically -->
+        </span>
+
+        <!-- document subMenu -->
+        <span id='docNavBar' style='display:none;'>
+
+            <!-- Navigate through images -->
+            <div class='searchHolder'>
+                <button style='font-size:14px' onclick="navDocPage('first')"><i class='fa fa-angle-double-left'></i></button>
+                <button style='font-size:14px' onclick="navDocPage('prev')"><i class='fa fa-angle-left'></i></button>
+                <input type="number" id="docPageNumInput" name="docPageNumInput" class='pageNumInput'> <!-- there's a listener on this -->
+                <span id="totalDocPages"> of </span>
+                <button style='font-size:14px' onclick="navDocPage('next')"><i class='fa fa-angle-right'></i></button>
+                <button style='font-size:14px' onclick="navDocPage('last')"><i class='fa fa-angle-double-right'></i></button>
+            </div>
+
+            <!-- Search document -->
+            <div class='searchHolder'>
+
+                <div class='input-wrapper'>
+                    <input type='text' id='docPageSearchInput' name='docPageSearchInput' class='searchInput' placeholder='Search this document'>
+                    <button onclick="clearSearchInput('docPageSearchInput')" style='font-size:10px'>
+                        <i class='fa fa-close' id='clearInputBtn'></i>
+                    </button>
+                </div>
+
+                <!-- search button -->
+                <div class="searchBtnHldr">
+                    <button class="searchBtn">
+                        Search
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="searchBtn-content">
+                        <a onclick="searchDocument(1.00)">1.00 Exact</a>
+                        <a onclick="searchDocument(0.94)">0.94 Fuzzy</a>
+                        <a onclick="searchDocument(0.88)">0.88 Fuzzy</a>
+                        <a onclick="searchDocument(0.82)">0.82 Fuzzy</a>
+                    </div>
+                </div>
+
+                <!-- results nav -->
+                <div class='navHolder' id='docSearchResultsNav'>
+                    <div id='docSearchResultsQty' style='display:inline-block'>0/0</div>
+                    <button style='font-size:12px;display:inline-block' onclick="navDocSearchResults('prev')"><i class='fa fa-angle-left'></i></button>
+                    <button style='font-size:12px;display:inline-block' onclick="navDocSearchResults('next')"><i class='fa fa-angle-right'></i></button>
+                </div>
+            </div>
+
+        </span> <!-- end of docNavBar -->
+
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- CONTENT TITLE BAR -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <DIV id="ContentTitle" class="titleBar3Empty">
+        <!-- changed programmatically, hidden for document displaying -->
+        &nbsp
+    </DIV>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SPACER (behind titles and menus to force the content down -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <DIV id="Spacer" class="divSpacer"></DIV>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SUB SELECTOR  (e.g. for long list of schools, list of maps, .... -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="subSelector" class='contentHolder' style="display:none">
+        <br>
+        <br>
+        <div id="subSelectorContents" class='subSelector'>
+            xxxx<br>
+        </div>
+        <!-- content filled programmatically -->
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SUB-PAGE CONTENT -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="iFrameHolder" class="iFrameHolder">
+        <iframe id="ContentHolder" src="Welcome/Welcome.html" title="description" class="contentHolder"></iframe>
+    </div>
+
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SITE SEARCH RESULTS -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="searchResultsHolder" class='contentHolder' style="display:none">
+        <div class='docPage'>
+            <div>
+                <br>
+            </div>
+            <table id='siteSearchResultsList' class='searchResultsTble'>
+                <!-- created by code in searchSite() -->
+
+
+            </table>
+
+        </div> <!-- end of docPage -->
+    </div> <!-- end of searchResultsHolder -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- DOCUMENT CONTENT  -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <div id="documentContentHolder" class='iFrameHolder' style="display:none">
+        <div class='docPage'>
+
+            <!-- image -->
+            <div id="docPageImage" class='docPageImage'>
+                <!-- figure -->
+                <figure class='docFigure' id='docPageFigure'>
+                    <img id='docPageImg' src='' style='max-height: 600px;'> <!-- source filled by javascript in loadDocPgNum() -->
+                    <figcaption id='figCaption' class='unNumberedFig'>
+                        <!-- content filled by javascript in loadDocPgNum() -->
+                    </figcaption>
+                </figure>
+
+            </div> <!-- end of docPageImage -->
+            <!-- annotation display -->
+            <div id="docAnnotationHolder" class='docPageAnnotationHolder'>
+                <p id='docAnnotation' class='docPageAnnotation'>
+                    <!-- content filled by javascript in loadDocPgNum() -->
+                </p>
+
+            </div> <!-- end of docAnnotationHolder -->
+
+
+        </div> <!-- end of docPage -->
+    </div> <!-- end of documentContentHolder -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <!-- SCRIPTS -->
+    <!-- ---------------------------------------------------------------------------------------------- -->
+    <SCRIPT src="scripts_initVars.ts"></SCRIPT>
+    <SCRIPT src="scripts.ts"></SCRIPT>
+
+</body>
+</html>
