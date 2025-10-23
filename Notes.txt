@@ -3,4 +3,14 @@
 COMPILE TYPESCRIPT
 -----------------------
 1) Package Manager Console
-2) tsc
+2) tsc  (compiles all typescript files and uses tsconfig.json for options)
+
+-----------------------
+GITHUB COMMIT
+-----------------------
+0) TEST the site at file:///C:/__BothOfUs/Genealogy/Documents/WebPages/Genealogy/PrairieRoots/index.html
+1) "Git Changes" tab, next to 'Solution Explorer' tab
+2) Enter version number in 'message'
+3) "Commit All" dropdown, select "Commit All and Push"
+4) Wait for online Github repository to deploy new version
+5) Open page at https://bryan-1963.github.io/PrairieRoots/

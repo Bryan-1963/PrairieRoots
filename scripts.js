@@ -28,27 +28,25 @@ class AnnotatedPhotoObject {
 class PageStack {
 }
 ;
-//==========================================================================================
+//======================================================================================================================================================================================
 // GLOBAL VARIABLES
-//==========================================================================================
+//======================================================================================================================================================================================
 var topTitleHeight = 46;
 var topMenuHeight = 51;
+var subMenu = document.getElementById("SubMenu");
 var subTitleHeight = 46;
 var subMenuHeight = 51;
 var contentTitleHeight = 46;
-var webRootLocation = "https://bryan-1963.github.io/JacksonCounty_KS_SchoolHistory/";
+var webRootLocation = "https://bryan-1963.github.io/PrairieRoots/";
 var subMenuName = '';
 var subMenuCat = '';
+var contentTitleBar = document.getElementById("ContentTitle");
 var webStack = []; //stack of pages loaded so can navigate back and forth
 var webStackIndex = 0;
 // pageObject arrays
-var maps = []; //array of PageObjects for maps
-var countySchoolDistricts = []; //array of PageObjects for elementary schools
-var countyHighSchools = []; //array of PageObjects for high schools
-var usdSchools = []; //array of PageObjects for USDs
-var pottawatomieMissionSchool = new PageObject();
-var colleges = [];
-var overviews = [];
+var people = []; //array of PageObjects for people
+var places = []; //array of PageObjects for places
+var overviews = []; //array of PageObjects for overviews
 //siteSearch variables
 var siteSearchInputBox = document.getElementById("siteSearchInputBox");
 var siteSearchPrecision = 1.00;
@@ -75,7 +73,7 @@ var myIframe = document.getElementById('ContentHolder');
 //=======================================================================================================================================================	
 window.addEventListener("resize", this.sizeBars);
 document.getElementById("MainMenu").addEventListener("load", this.sizeBars);
-document.getElementById("SubMenu").addEventListener("load", this.sizeBars);
+subMenu.addEventListener("load", this.sizeBars);
 document.getElementById("iFrameHolder").addEventListener("load", this.sizeBars);
 document.getElementById("SubTitle").addEventListener("load", this.sizeBars);
 document.getElementById("ContentTitle").addEventListener("load", this.sizeBars);
@@ -86,12 +84,12 @@ var ro = new ResizeObserver(entries => {
     for (let entry of entries) {
         if (entry.contentBoxSize) {
             //entry.target.handleResize(entry);
-            this.sizeBars;
+            this.sizeBars();
         }
     }
 });
 ro.observe(document.getElementById("MainMenu"));
-ro.observe(document.getElementById("SubMenu"));
+ro.observe(subMenu);
 ro.observe(document.getElementById("SubTitle"));
 ro.observe(document.getElementById("ContentTitle"));
 //-----------------------------------------
@@ -165,15 +163,10 @@ myIframe.addEventListener("load", function () {
 // startup
 //==========================================================================================
 function startup() {
-    countySchoolDistricts.length = 0;
-    countyHighSchools.length = 0;
-    usdSchools.length = 0;
-    this.initVars; //load global variables
-    this.sizeBars; //size and place the menu bars
+    this.initVars(); //load global variables
+    this.sizeBars(); //size and place the menu bars
     //in case startup completed before iFrame loaded, initialize webStack
     if (webStack.length === 0) {
-        //console.log("-------------------------------------------------------------------------------");
-        //console.log("initializing webStack from startup");
         //initialize the web page stack
         let thisPage = new PageObject();
         thisPage.number = "";
@@ -264,12 +257,12 @@ function navStack(dir) {
                 }
                 break;
             //......................
-            // maps
+            // People
             //......................
-            case 'Maps':
-                //main menu click to maps:
+            case 'People':
+                //main menu click to People:
                 if (webStack[webStackIndex].pageParam.path === "") {
-                    menuClick({ "category": "Maps", "subCat": "" }, false);
+                    menuClick({ "category": "People", "subCat": "" }, false);
                 }
                 //sub selector click to a maps page
                 else {
@@ -277,36 +270,16 @@ function navStack(dir) {
                 }
                 break;
             //......................
-            // Schools
+            // Places
             //......................
-            case 'Schools':
-            case 'PottawatomieMission':
-            case 'JacksonCounty':
-            case 'Joint':
-            case 'Adjacent':
-            case 'USD':
-            case 'College':
-                //main menu click to overview page
+            case 'Places':
+                //main menu click to People:
                 if (webStack[webStackIndex].pageParam.path === "") {
-                    menuClick({ "category": "Schools", "subCat": "" }, false);
+                    menuClick({ "category": "Places", "subCat": "" }, false);
                 }
-                //sub selector click to school page
+                //sub selector click to a maps page
                 else {
-                    let pgPath = webStack[webStackIndex].pageParam['path'];
-                    let subPg = "";
-                    if (pgPath.indexOf('Overview') >= 0) {
-                        subPg = "Overview";
-                    }
-                    else if (pgPath.indexOf('People') >= 0) {
-                        subPg = "People";
-                    }
-                    else if (pgPath.indexOf('Locations') >= 0) {
-                        subPg = "Locations";
-                    }
-                    else if (pgPath.indexOf('Events') >= 0) {
-                        subPg = "Events";
-                    }
-                    showSchool(webStack[webStackIndex].pageParam, subPg, false);
+                    showMap(webStack[webStackIndex].pageParam, false);
                 }
                 break;
             //......................
@@ -442,24 +415,22 @@ function clearDocumentSearch() {
 //==========================================================================================
 // configurePage
 //==========================================================================================
-function configurePage(config, showTitleBar3, showSchoolNavBar) {
+function configurePage(config, showTitleBar3) {
     //INPUTS:
     //	config can be:
     //		'siteSearchResults' = display the searchResultsHolder div
     //		'document' = display the documentContentHolder div
     //		'subPage' = display the iFrameHolder div
-    //		'subSelector' = display the subselector for long lists like schools, maps,....
+    //		'subSelector' = display the subselector for long lists like people, places,....
     //		'test' = change as required for testing
     //======================================================================================
     var subTitle = document.getElementById("SubTitle");
-    var subMenu = document.getElementById("SubMenu");
-    var contentTitleBar = document.getElementById("ContentTitle");
+    //var subMenu = document.getElementById("SubMenu");
     let iFrameHldr = document.getElementById("iFrameHolder");
     let documentContentHolder = document.getElementById("documentContentHolder");
     let docAnnot = document.getElementById("docAnnotation");
     let docFigCapt = document.getElementById("figCaption");
     let docNavBar = document.getElementById("docNavBar");
-    let schoolNavBar = document.getElementById("schoolNavBar");
     let docPgImg = document.getElementById("docPageImg");
     let searchRsltsHolder = document.getElementById("searchResultsHolder");
     let subSelectorHolder = document.getElementById("subSelector");
@@ -474,13 +445,12 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             iFrameHldr.style.display = "none";
             subSelectorHolder.style.display = "none";
             documentContentHolder.style.display = "none";
-            subMenu.style.display = "block";
+            subMenu.style.display = "flex";
             searchRsltsHolder.style.display = "block";
             docNavBar.style.display = "none";
             docAnnot.innerHTML = "";
             docFigCapt.innerHTML = "";
             docPgImg.src = '';
-            contentTitleBar.className = "titleBar3Empty";
             break;
         //------------------------
         case 'document':
@@ -491,9 +461,8 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             documentContentHolder.style.display = "block";
             searchRsltsHolder.style.display = "none";
             subSelectorHolder.style.display = "none";
-            subMenu.style.display = "block";
+            subMenu.style.display = "flex";
             docNavBar.style.display = "block";
-            schoolNavBar.style.display = "none";
             docAnnot.innerHTML = "";
             docFigCapt.innerHTML = "";
             docPgImg.src = '';
@@ -507,9 +476,8 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             documentContentHolder.style.display = "none";
             searchRsltsHolder.style.display = "none";
             subSelectorHolder.style.display = "none";
-            subMenu.style.display = "block";
+            subMenu.style.display = "flex";
             docNavBar.style.display = "none";
-            schoolNavBar.style.display = "none";
             docAnnot.innerHTML = "";
             docFigCapt.innerHTML = "";
             docPgImg.src = '';
@@ -520,11 +488,9 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             subMenuName = '';
             subMenuCat = '';
             subTitle.innerHTML = "Test";
-            subMenu.style.display = "block";
+            subMenu.style.display = "flex";
             docNavBar.style.display = "block";
-            schoolNavBar.style.display = "none";
             subSelectorHolder.style.display = "none";
-            contentTitleBar.className = "titleBar3Empty";
             iFrameHldr.style.display = "none";
             documentContentHolder.style.display = "block";
             docAnnot.innerHTML = "";
@@ -540,9 +506,8 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             subMenuCat = '';
             documentContentHolder.style.display = "none";
             subSelectorHolder.style.display = "block";
-            subMenu.style.display = "block";
+            subMenu.style.display = "flex";
             docNavBar.style.display = "none";
-            schoolNavBar.style.display = "none";
             searchRsltsHolder.style.display = "none";
             docAnnot.innerHTML = "";
             docFigCapt.innerHTML = "";
@@ -550,16 +515,10 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
             break;
     }
     if (showTitleBar3) {
-        contentTitleBar.className = "titleBar3";
+        contentTitleBar.style.display = "inline-block";
     }
     else {
-        contentTitleBar.className = "titleBar3Empty";
-    }
-    if (showSchoolNavBar) {
-        schoolNavBar.style.display = "block";
-    }
-    else {
-        schoolNavBar.style.display = "none";
+        contentTitleBar.style.display = "none";
     }
 }
 //==========================================================================================
@@ -567,7 +526,7 @@ function configurePage(config, showTitleBar3, showSchoolNavBar) {
 //==========================================================================================
 function showSiteSearchResults(userClick = true) {
     //show the search results page
-    configurePage('siteSearchResults', false, false);
+    configurePage('siteSearchResults', false);
     //fill in the contents of the results page
     let rsltStr = "<colgroup><col style='width:25%'><col style='width:75%'></colgroup>";
     rsltStr = rsltStr + "<tr><th>Page</th><th>Matches</th></tr>";
@@ -601,26 +560,20 @@ function showSiteSearchResults(userClick = true) {
                 thisFnCall = "showOverview(" + param + ",true)";
                 break;
             //......................
-            // maps
+            // People
             //......................
-            case 'Maps':
+            case 'People':
                 param = JSON.stringify(siteSearchResults[i]['page']);
                 param = param.replace(/"/g, "'");
-                thisFnCall = "showMap(" + param + ",true)";
+                thisFnCall = "showPeople(" + param + ",true)";
                 break;
             //......................
-            // Schools
+            // Places
             //......................
-            case 'Schools':
-            case 'PottawatomieMission':
-            case 'JacksonCounty':
-            case 'Joint':
-            case 'Adjacent':
-            case 'USD':
-            case 'College':
+            case 'Places':
                 param = JSON.stringify(siteSearchResults[i]['page']);
                 param = param.replace(/"/g, "'");
-                thisFnCall = "showSchool(" + param + ",'',true)";
+                thisFnCall = "showPlaces(" + param + ",'',true)";
                 break;
             //......................
             // References
@@ -664,7 +617,7 @@ function showSiteSearchResults(userClick = true) {
         addToWebStack(thisPage);
     }
     // ADJUST LOCATIONS OF BARS
-    this.sizeBars;
+    this.sizeBars();
 }
 //==========================================================================================
 // searchSite
@@ -1061,7 +1014,7 @@ function loadDocPages(filePath_1) {
         //console.log("rcd filePath="+filePath+", docTitle="+docTitle+", userClick="+userClick);
         docPgPath = filePath; //load global variable
         documentTitle = docTitle; //load global variable
-        configurePage('document', false, true);
+        configurePage('document', false);
         //console.log("configured page");
         //set the subTitle
         document.getElementById("SubTitle").innerHTML = docTitle;
@@ -1259,114 +1212,6 @@ function navDocPage(movement) {
 }
 ;
 //==========================================================================================
-// buildSchoolLinks
-//==========================================================================================	
-function buildSchoolLinks() {
-    var subSelContents = "";
-    let param = "";
-    //............................
-    // Pottawatomie Mission
-    //............................
-    param = JSON.stringify(pottawatomieMissionSchool);
-    param = param.replace(/"/g, "'");
-    subSelContents = subSelContents + String.fromCharCode(13) + "<a></a>" + String.fromCharCode(13) + "<a><b><u>FEDERAL</u></b></a><BR>";
-    subSelContents = subSelContents + String.fromCharCode(13) + "<a class='link-like' onclick=\"showSchool(";
-    subSelContents = subSelContents + param + ", 'Overview')\">";
-    subSelContents = subSelContents + pottawatomieMissionSchool.title + "</a><BR>";
-    //............................
-    // County Districts
-    //............................
-    var foundJoints = false;
-    var foundAdjacents = false;
-    subSelContents = subSelContents + "<BR><BR>" + String.fromCharCode(13) + "<a></a>" + String.fromCharCode(13) + "<a><b><u>COUNTY GRADE SCHOOLS</u></b></a><BR>";
-    for (var i = 0; i <= countySchoolDistricts.length - 1; i++) {
-        if (countySchoolDistricts[i].category === "Joint" && !foundJoints) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>JOINT DISTRICTS</u></a><BR>";
-            foundJoints = true;
-        }
-        if (countySchoolDistricts[i].category === "Adjacent" && !foundAdjacents) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>ADJACENT DISTRICTS</u></a><BR>";
-            foundAdjacents = true;
-        }
-        // Example:
-        //<a onclick="showSchool({'number':'005','title':'5 Banner','path':'CountyDistricts/005/005_Overview.html','category':'JacksonCounty'})">5 Banner</a>
-        param = JSON.stringify(countySchoolDistricts[i]);
-        param = param.replace(/"/g, "'");
-        subSelContents = subSelContents + String.fromCharCode(13) + "<a class='link-like' onclick=\"showSchool(";
-        subSelContents = subSelContents + param + ", 'Overview', true)\">";
-        subSelContents = subSelContents + countySchoolDistricts[i].title + "</a><BR>";
-    }
-    //............................
-    // County High Schools
-    //............................
-    foundJoints = false;
-    foundAdjacents = false;
-    subSelContents = subSelContents + "<BR><BR>" + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><b><u>COUNTY HIGH SCHOOLS</u></b></a><BR>";
-    for (var i = 0; i <= countyHighSchools.length - 1; i++) {
-        if (countyHighSchools[i].category === "Joint" && !foundJoints) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>JOINT DISTRICTS</u></a><BR>";
-            foundJoints = true;
-        }
-        if (countyHighSchools[i].category === "Adjacent" && !foundAdjacents) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>ADJACENT DISTRICTS</u></a><BR>";
-            foundAdjacents = true;
-        }
-        // Example:
-        //<a onclick="menuClick({category:'High Schools',subCat:'RHS5', title:'RHS 5 Mayetta'})">RHS 5 Mayetta</a>
-        param = JSON.stringify(countyHighSchools[i]);
-        param = param.replace(/"/g, "'");
-        subSelContents = subSelContents + String.fromCharCode(13) + "<a class='link-like' onclick=\"showSchool(";
-        subSelContents = subSelContents + param + ", 'Overview', true)\">";
-        subSelContents = subSelContents + countyHighSchools[i].title + "</a><BR>";
-    }
-    //............................
-    // USDs
-    //............................
-    foundJoints = false;
-    foundAdjacents = false;
-    subSelContents = subSelContents + "<BR><BR>" + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><b><u>UNIFIED SCHOOL DISTRICTS</u></b></a><BR>";
-    for (var i = 0; i <= usdSchools.length - 1; i++) {
-        if (usdSchools[i].category === "Joint" && !foundJoints) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>JOINT DISTRICTS</u></a><BR>";
-            foundJoints = true;
-        }
-        if (usdSchools[i].category === "Adjacent" && !foundAdjacents) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>ADJACENT DISTRICTS</u></a><BR>";
-            foundAdjacents = true;
-        }
-        // Example:
-        //<a onclick="menuClick({category:'UnifiedSchoolDistricts',subCat:'USD337', title:'USD337 Royal Valley'})">USD337 Royal Valley</a>
-        param = JSON.stringify(usdSchools[i]);
-        param = param.replace(/"/g, "'");
-        subSelContents = subSelContents + String.fromCharCode(13) + "<a class='link-like' onclick=\"showSchool(";
-        subSelContents = subSelContents + param + ", 'Overview', true)\">";
-        subSelContents = subSelContents + usdSchools[i].title + "</a><BR>";
-    }
-    //............................
-    // Colleges
-    //............................
-    foundJoints = false;
-    foundAdjacents = false;
-    subSelContents = subSelContents + "<BR><BR>" + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><b><u>COLLEGES</u></b></a><BR>";
-    for (var i = 0; i <= colleges.length - 1; i++) {
-        if (colleges[i].category === "Joint" && !foundJoints) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>JOINT DISTRICTS</u></a><BR>";
-            foundJoints = true;
-        }
-        if (colleges[i].category === "Adjacent" && !foundAdjacents) {
-            subSelContents = subSelContents + String.fromCharCode(13) + "<BR><a></a>" + String.fromCharCode(13) + "<a><u>ADJACENT DISTRICTS</u></a><BR>";
-            foundAdjacents = true;
-        }
-        param = JSON.stringify(colleges[i]);
-        param = param.replace(/"/g, "'");
-        subSelContents = subSelContents + String.fromCharCode(13) + "<a class='link-like' onclick=\"showSchool(";
-        subSelContents = subSelContents + param + ", 'Overview', true)\">";
-        subSelContents = subSelContents + colleges[i].title + "</a><BR>";
-    }
-    return subSelContents;
-}
-;
-//==========================================================================================
 // sizeBars
 //==========================================================================================
 function sizeBars() {
@@ -1386,9 +1231,13 @@ function sizeBars() {
     subMenu.style.top = (topTitleHeight + topMenuHeight + subTitleHeight) + 'px';
     subMenuHeight = subMenu.offsetHeight;
     // LOCATE CONTENT TITLE BAR AND CALCULATE ITS HEIGHT
-    var contentTitle = document.getElementById("ContentTitle");
-    contentTitle.style.top = (topTitleHeight + topMenuHeight + subTitleHeight + subMenuHeight) + 'px';
-    contentTitleHeight = contentTitle.offsetHeight;
+    contentTitleBar.style.top = (topTitleHeight + topMenuHeight + subTitleHeight + subMenuHeight) + 'px';
+    if (contentTitleBar.style.display === "none") {
+        contentTitleHeight = 0;
+    }
+    else {
+        contentTitleHeight = contentTitleBar.offsetHeight;
+    }
     // SIZE THE SPACER ELEMENT 
     var spacer = document.getElementById("Spacer");
     spacer.style.height = (topTitleHeight + topMenuHeight + subTitleHeight + subMenuHeight + contentTitleHeight) + 'px';
@@ -1398,9 +1247,8 @@ function sizeBars() {
 // showMap
 //==========================================================================================
 function showMap(params, userClick = true) {
-    var contentTitleBar = document.getElementById("ContentTitle");
     var subTitle = document.getElementById("SubTitle");
-    configurePage('subPage', true, false);
+    configurePage('subPage', true);
     subTitle.innerHTML = "Maps";
     contentTitleBar.innerHTML = params['title'];
     myIframe.src = params['path'];
@@ -1411,52 +1259,15 @@ function showMap(params, userClick = true) {
     }
 }
 //==========================================================================================
-// showSchool
+// showPlaces
 //==========================================================================================
-function showSchool(params, subMenuSelection = "", userClick = true) {
-    let contentTitleBar = document.getElementById("ContentTitle");
+function showPlaces(params, subMenuSelection = "", userClick = true) {
     let subTitle = document.getElementById("SubTitle");
     let filePath = "";
-    //subMenuSelection is only specified when user changes subMenu for a school (e.g. Overview, Location, People, Event)
-    // stack moves and search results need sorted here
-    if (subMenuSelection != "") {
-        filePath = params['path'].replace('Overview', subMenuSelection);
-        filePath = filePath.replace('Events', subMenuSelection);
-        filePath = filePath.replace('Locations', subMenuSelection);
-        filePath = filePath.replace('People', subMenuSelection);
-    }
-    else {
-        filePath = params['path'];
-        if (filePath.indexOf('Overview') >= 0) {
-            subMenuSelection = 'Overview';
-        }
-        else if (filePath.indexOf('Events') >= 0) {
-            subMenuSelection = 'Events';
-        }
-        else if (filePath.indexOf('Locations') >= 0) {
-            subMenuSelection = 'Locations';
-        }
-        else if (filePath.indexOf('People') >= 0) {
-            subMenuSelection = 'People';
-        }
-    }
     //show the correct configuration and update titles
-    configurePage('subPage', true, true);
-    let thisTitle = params['title'];
-    thisTitle = thisTitle.replace(' Locations', ''); //search results can send title with this in it
-    thisTitle = thisTitle.replace(' Events', ''); //search results can send title with this in it
-    thisTitle = thisTitle.replace(' People', ''); //search results can send title with this in it
-    subTitle.innerHTML = "School: " + thisTitle;
+    configurePage('subPage', true);
+    subTitle.innerHTML = "Places: ";
     contentTitleBar.innerHTML = subMenuSelection;
-    //build and fill the school-specific navbar
-    let schoolNavBar = document.getElementById("schoolNavBar");
-    let strParam = JSON.stringify(params);
-    strParam = strParam.replace(/"/g, "'");
-    let navHTML = "<a onclick=\"showSchool(" + strParam + ",'Overview')\">Overview</a>";
-    navHTML = navHTML + "<a onclick=\"showSchool(" + strParam + ",'Locations')\">Location(s) and Bldg(s)</a>";
-    navHTML = navHTML + "<a onclick=\"showSchool(" + strParam + ",'People')\">People</a>";
-    navHTML = navHTML + "<a onclick=\"showSchool(" + strParam + ",'Events')\">Events</a>";
-    schoolNavBar.innerHTML = navHTML;
     //add to the web page stack if user navigated here
     if (userClick) {
         //make a new object since we may have modified the filePath above
@@ -1471,10 +1282,9 @@ function showSchool(params, subMenuSelection = "", userClick = true) {
 // showOverview
 //==========================================================================================
 function showOverview(params, userClick = true) {
-    let contentTitleBar = document.getElementById("ContentTitle");
     let subTitle = document.getElementById("SubTitle");
     //show the correct configuration and update titles
-    configurePage('subPage', true, false);
+    configurePage('subPage', true);
     subTitle.innerHTML = "Overview";
     contentTitleBar.innerHTML = params['title'];
     //load the requested page
@@ -1524,14 +1334,11 @@ function menuClick(params, userClick = true) {
     }
     var contentSource = '';
     var subTitle = document.getElementById("SubTitle");
-    var subMenu = document.getElementById("SubMenu");
-    var contentTitleBar = document.getElementById("ContentTitle");
     let iFrameHldr = document.getElementById("iFrameHolder");
     let documentContentHolder = document.getElementById("documentContentHolder");
     let docAnnot = document.getElementById("docAnnotation");
     let docFigCapt = document.getElementById("figCaption");
     let docNavBar = document.getElementById("docNavBar");
-    let schoolNavBar = document.getElementById("schoolNavBar");
     let docPgImg = document.getElementById("docPageImg");
     let searchRsltsHolder = document.getElementById("searchResultsHolder");
     let subSelectorContentHolder = document.getElementById("subSelectorContents");
@@ -1546,14 +1353,14 @@ function menuClick(params, userClick = true) {
         //---------------------------
         case 'Test':
             //---------------------------	
-            configurePage('test', false, false);
+            configurePage('test', false);
             //load the document pages
             loadDocPages("Test/Test_Files/AnnotatedPhotos_LloydCopeland.json");
             break;
         //---------------------------
         case 'Home':
             //---------------------------		  
-            configurePage('subPage', false, false);
+            configurePage('subPage', false);
             subTitle.innerHTML = "Welcome";
             myIframe.src = "Welcome/Welcome.html";
             //add to the web page stack if user navigated here
@@ -1569,7 +1376,7 @@ function menuClick(params, userClick = true) {
         //---------------------------
         case 'Overview':
             //---------------------------	
-            configurePage('subSelector', false, false);
+            configurePage('subSelector', false);
             subTitle.innerHTML = "Overview";
             //build contents of subSelectorContents
             subSelectorContents = "";
@@ -1593,20 +1400,20 @@ function menuClick(params, userClick = true) {
             }
             break;
         //---------------------------
-        case 'Maps':
+        case 'People':
             //---------------------------				
-            configurePage('subSelector', false, false);
-            subTitle.innerHTML = "Maps";
+            configurePage('subSelector', false);
+            subTitle.innerHTML = "People";
             //build contents of subSelectorContents
             subSelectorContents = "";
-            for (var i = 0; i <= maps.length - 1; i++) {
+            for (var i = 0; i <= people.length - 1; i++) {
                 // Example:
-                //<a onclick="showMap({"category":"Maps","subCat":"1878 Jackson Co.","path":"Maps/1878_JacksonCo.html","title":"1878 Jackson Co."})">1878 Jackson Co.</a>
-                param = JSON.stringify(maps[i]);
+                //<a onclick="showMap({"category":"People","subCat":"1878 Jackson Co.","path":"Maps/1878_JacksonCo.html","title":"1878 Jackson Co."})">1878 Jackson Co.</a>
+                param = JSON.stringify(people[i]);
                 param = param.replace(/"/g, "'");
                 subSelectorContents = subSelectorContents + String.fromCharCode(13) + "<a class='link-like'";
                 subSelectorContents = subSelectorContents + "onclick=\"showMap(" + param + ", true)\">";
-                subSelectorContents = subSelectorContents + maps[i].title + "</a><br><br>";
+                subSelectorContents = subSelectorContents + people[i].title + "</a><br><br>";
             }
             subSelectorContentHolder.style.columnCount = '3';
             subSelectorContentHolder.innerHTML = subSelectorContents;
@@ -1614,34 +1421,33 @@ function menuClick(params, userClick = true) {
             if (userClick) {
                 thisPage = new PageObject();
                 thisPage.number = "";
-                thisPage.title = "Maps";
+                thisPage.title = "People";
                 thisPage.path = "";
-                thisPage.category = "Maps";
+                thisPage.category = "People";
                 pageStckEl = new PageStack();
                 addToWebStack(thisPage);
             }
             break;
         //---------------------------		
-        case 'Schools':
+        case 'Places':
             //---------------------------
-            configurePage('subSelector', false, false);
-            subTitle.innerHTML = "Schools";
+            configurePage('subSelector', false);
+            subTitle.innerHTML = "Places";
             subSelectorContentHolder.style.columnCount = '4';
-            subSelectorContentHolder.innerHTML = buildSchoolLinks(); //call subroutine to load the links
             //add to the web page stack if user navigated here
             if (userClick) {
                 thisPage = new PageObject();
                 thisPage.number = "";
-                thisPage.title = "Schools";
+                thisPage.title = "Places";
                 thisPage.path = "";
-                thisPage.category = "Schools";
+                thisPage.category = "Places";
                 addToWebStack(thisPage);
             }
             break;
         //---------------------------	
         case 'References':
             //---------------------------	
-            configurePage('subPage', false, false);
+            configurePage('subPage', false);
             subTitle.innerHTML = "References";
             myIframe.src = "References/References.html";
             //add to the web page stack if user navigated here
@@ -1657,7 +1463,7 @@ function menuClick(params, userClick = true) {
         //---------------------------	
         case 'SourceMatl':
             //---------------------------	
-            configurePage('subPage', false, false);
+            configurePage('subPage', false);
             subTitle.innerHTML = "Source Materials";
             myIframe.src = "SourceMatls/SourceMatls.html";
             //add to the web page stack if user navigated here
@@ -1675,7 +1481,7 @@ function menuClick(params, userClick = true) {
         //---------------------------	
         case 'About':
             //---------------------------	
-            configurePage('subPage', false, false);
+            configurePage('subPage', false);
             subTitle.innerHTML = "About";
             myIframe.src = "About/About.html";
             //add to the web page stack if user navigated here
@@ -1692,7 +1498,7 @@ function menuClick(params, userClick = true) {
     }
     window.top.scrollTo(0, 0);
     // ADJUST LOCATIONS OF BARS
-    this.sizeBars;
+    this.sizeBars();
 }
 ;
 //==========================================================================================
